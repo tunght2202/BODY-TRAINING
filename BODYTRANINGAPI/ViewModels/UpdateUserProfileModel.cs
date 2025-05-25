@@ -16,7 +16,12 @@ namespace BODYTRANINGAPI.ViewModels
         public string? PhoneNumber { get; set; }
 
         public string? FullName { get; set; }
+        [Range(50, 250, ErrorMessage = "Height must from 50cm to 250cm.")]
+        public decimal? Height { get; set; }
 
+        [Range(20, 300, ErrorMessage = "Weight must from 20kg to 300kg.")]
+        public decimal? Weight { get; set; }
+        public string? HealthStatus { get; set; }
         [Required(ErrorMessage = "Age is required.")]
         [Range(1, 120, ErrorMessage = "Age must in range from 1 to 120.")]
         public int? Age { get; set; }

@@ -15,7 +15,8 @@ public partial class User : IdentityUser
 
     public decimal? Weight { get; set; }
 
-    public decimal? Bmi { get; set; }
+    public decimal? Bmi { get; set; } 
+
     public string? ImageURL { get; set; }
 
     public string? HealthStatus { get; set; }

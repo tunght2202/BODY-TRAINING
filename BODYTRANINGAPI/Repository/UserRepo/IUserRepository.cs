@@ -11,7 +11,7 @@ namespace BODYTRANINGAPI.Repository.UserRepo
         Task<bool> RegisterAccountAsync(VerifyOtpModel model);
         Task<bool> RequestPasswordResetAsync(ForgotPasswordModel model);
         Task<bool> ResetPasswordAsync(ResetPasswordModel model);
-        Task<bool> VerifyOtpAsync(VerifyOtpModel model);
+        Task<bool> RequestPasswordResetVerifyOtpAsync(VerifyOtpModel model);
         Task<User> GetUserProfile(string UserId);
         Task<bool> UpdateUserProfileRequest(User user, UpdateUserProfileModel model);
         Task<bool> UpdateUserProfile(VerifyOtpModel model, User user);
