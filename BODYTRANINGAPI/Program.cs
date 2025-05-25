@@ -1,4 +1,7 @@
 ﻿using BODYTRANINGAPI.Models;
+using BODYTRANINGAPI.Repository.UserRepo;
+using BODYTRANINGAPI.Services.Cloudinaries;
+using BODYTRANINGAPI.Services.Emails;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,6 +49,11 @@ builder.Services.Configure<IdentityOptions>(options => {
 
 });
 builder.Services.AddHttpClient();
+builder.Services.AddTransient<UserManager<User>, UserManager<User>>();
+builder.Services.AddTransient<SignInManager<User>, SignInManager<User>>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGmailService, GmailService>();
+builder.Services.AddSingleton<CloudinaryService>();
 
 
 var app = builder.Build();
