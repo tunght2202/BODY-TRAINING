@@ -1,4 +1,6 @@
-﻿namespace BODYTRANINGAPI.Models;
+﻿using System.Reflection.Metadata.Ecma335;
+
+namespace BODYTRANINGAPI.Models;
 
 public partial class ProgressLog
 {
@@ -19,4 +21,5 @@ public partial class ProgressLog
     public int? CaloriesConsumed { get; set; }
 
     public virtual User? User { get; set; }
+    public ICollection<ProgressLogsMedias> ProgressLogsMedias { get; set; }
 }

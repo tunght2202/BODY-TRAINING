@@ -15,7 +15,8 @@ namespace BODYTRANINGAPI.Migrations
                 name: "Muscles",
                 columns: table => new
                 {
-                    MuscleId = table.Column<int>(type: "int", nullable: false),
+                    MuscleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     ImageUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
@@ -98,7 +99,8 @@ namespace BODYTRANINGAPI.Migrations
                 name: "Exercises",
                 columns: table => new
                 {
-                    ExerciseId = table.Column<int>(type: "int", nullable: false),
+                    ExerciseId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     MuscleId = table.Column<int>(type: "int", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -126,7 +128,8 @@ namespace BODYTRANINGAPI.Migrations
                 name: "MealPlans",
                 columns: table => new
                 {
-                    MealPlanId = table.Column<int>(type: "int", nullable: false),
+                    MealPlanId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     MealType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -147,7 +150,8 @@ namespace BODYTRANINGAPI.Migrations
                 name: "ProgressLogs",
                 columns: table => new
                 {
-                    LogId = table.Column<int>(type: "int", nullable: false),
+                    LogId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     LogDate = table.Column<DateOnly>(type: "date", nullable: true),
                     Weight = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
@@ -255,7 +259,8 @@ namespace BODYTRANINGAPI.Migrations
                 name: "WorkoutPlans",
                 columns: table => new
                 {
-                    PlanId = table.Column<int>(type: "int", nullable: false),
+                    PlanId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -276,9 +281,10 @@ namespace BODYTRANINGAPI.Migrations
                 name: "ExerciseMedia",
                 columns: table => new
                 {
-                    MediaId = table.Column<int>(type: "int", nullable: false),
+                    MediaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     ExerciseId = table.Column<int>(type: "int", nullable: true),
-                    MediaType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    MediaType = table.Column<int>(type: "int", maxLength: 50, nullable: true),
                     Uri = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Caption = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
                 },
@@ -293,10 +299,33 @@ namespace BODYTRANINGAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProgressLogsMedias",
+                columns: table => new
+                {
+                    PLMId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProgressLogId = table.Column<int>(type: "int", nullable: false),
+                    MediaUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MediaType = table.Column<int>(type: "int", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProgressLogsMedias", x => x.PLMId);
+                    table.ForeignKey(
+                        name: "FK_ProgressLogsMedias_ProgressLogs_ProgressLogId",
+                        column: x => x.ProgressLogId,
+                        principalTable: "ProgressLogs",
+                        principalColumn: "LogId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "WorkoutSchedules",
                 columns: table => new
                 {
-                    ScheduleId = table.Column<int>(type: "int", nullable: false),
+                    ScheduleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     PlanId = table.Column<int>(type: "int", nullable: true),
                     WorkoutDate = table.Column<DateOnly>(type: "date", nullable: true),
                     WorkoutTime = table.Column<TimeOnly>(type: "time", nullable: true),
@@ -336,6 +365,11 @@ namespace BODYTRANINGAPI.Migrations
                 name: "IX_ProgressLogs_UserId",
                 table: "ProgressLogs",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProgressLogsMedias_ProgressLogId",
+                table: "ProgressLogsMedias",
+                column: "ProgressLogId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
@@ -397,7 +431,7 @@ namespace BODYTRANINGAPI.Migrations
                 name: "MealPlans");
 
             migrationBuilder.DropTable(
-                name: "ProgressLogs");
+                name: "ProgressLogsMedias");
 
             migrationBuilder.DropTable(
                 name: "RoleClaims");
@@ -419,6 +453,9 @@ namespace BODYTRANINGAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Exercises");
+
+            migrationBuilder.DropTable(
+                name: "ProgressLogs");
 
             migrationBuilder.DropTable(
                 name: "Roles");
