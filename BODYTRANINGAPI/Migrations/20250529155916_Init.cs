@@ -284,7 +284,6 @@ namespace BODYTRANINGAPI.Migrations
                     MediaId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ExerciseId = table.Column<int>(type: "int", nullable: true),
-                    MediaType = table.Column<int>(type: "int", maxLength: 50, nullable: true),
                     Uri = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Caption = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
                 },
@@ -306,7 +305,6 @@ namespace BODYTRANINGAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProgressLogId = table.Column<int>(type: "int", nullable: false),
                     MediaUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MediaType = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

@@ -51,7 +51,6 @@ public class  BODYTRAININGDbContext: IdentityDbContext<User>
             entity.HasKey(e => e.MediaId);
             entity.Property(e => e.MediaId).ValueGeneratedOnAdd();
             entity.Property(e => e.Caption).HasMaxLength(200);
-            entity.Property(e => e.MediaType).HasMaxLength(50);
             entity.Property(e => e.Uri).HasMaxLength(255);
             entity.HasOne(d => d.Exercise).WithMany(p => p.ExerciseMedia)
                 .HasForeignKey(d => d.ExerciseId);

@@ -6,8 +6,6 @@ public partial class ExerciseMedia
 
     public int? ExerciseId { get; set; }
 
-    public MediaType? MediaType { get; set; }
-
     public string? Uri { get; set; }
 
     public string? Caption { get; set; }
