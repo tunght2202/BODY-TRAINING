@@ -78,10 +78,6 @@ namespace BODYTRANINGAPI.Migrations
                     b.Property<int?>("ExerciseId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MediaType")
-                        .HasMaxLength(50)
-                        .HasColumnType("int");
-
                     b.Property<string>("Uri")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -198,9 +194,6 @@ namespace BODYTRANINGAPI.Migrations
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("MediaType")
-                        .HasColumnType("int");
 
                     b.Property<string>("MediaUrl")
                         .IsRequired()

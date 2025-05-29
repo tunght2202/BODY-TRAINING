@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BODYTRANINGAPI.Migrations
 {
     [DbContext(typeof(BODYTRAININGDbContext))]
-    [Migration("20250527140849_Init")]
+    [Migration("20250529155916_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -79,10 +79,6 @@ namespace BODYTRANINGAPI.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<int?>("ExerciseId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MediaType")
-                        .HasMaxLength(50)
                         .HasColumnType("int");
 
                     b.Property<string>("Uri")
@@ -201,9 +197,6 @@ namespace BODYTRANINGAPI.Migrations
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("MediaType")
-                        .HasColumnType("int");
 
                     b.Property<string>("MediaUrl")
                         .IsRequired()
