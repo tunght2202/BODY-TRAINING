@@ -2,11 +2,8 @@
 using BODYTRANINGAPI.Repository.ProgressLogRepo;
 using BODYTRANINGAPI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace BODYTRANINGAPI.Controllers
 {

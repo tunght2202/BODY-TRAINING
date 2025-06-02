@@ -4,6 +4,8 @@ namespace BODYTRANINGAPI.ViewModels
 {
     public class GetProgressLogModel
     {
+        public int LogId { get; set; }
+
         public DateOnly? LogDate { get; set; }
 
         [Required(ErrorMessage = "Height is required.")]
