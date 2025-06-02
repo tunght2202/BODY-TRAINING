@@ -47,6 +47,7 @@ namespace BODYTRANINGAPI.Repository.ProgressLogRepo
                 .ToListAsync();
             var progressLogModels = progressLog.Select(pl => new GetProgressLogModel
             {
+                LogId = pl.LogId,
                 LogDate = pl.LogDate,
                 Weight = pl.Weight,
                 Height = pl.Height,
@@ -108,6 +109,7 @@ namespace BODYTRANINGAPI.Repository.ProgressLogRepo
 
             var progressLogModels = new GetProgressLogModel() 
             {
+                LogId = progressLog.LogId,
                 LogDate = progressLog.LogDate,
                 Weight = progressLog.Weight,
                 Height = progressLog.Height,

@@ -1,6 +1,9 @@
 ﻿using BODYTRANINGAPI.Models;
+using BODYTRANINGAPI.Repository.ExerciseRepo;
+using BODYTRANINGAPI.Repository.MealPlanRepo;
 using BODYTRANINGAPI.Repository.ProgressLogRepo;
 using BODYTRANINGAPI.Repository.UserRepo;
+using BODYTRANINGAPI.Repository.WorkoutPlanRepo;
 using BODYTRANINGAPI.Services.Cloudinaries;
 using BODYTRANINGAPI.Services.Emails;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,6 +60,9 @@ builder.Services.AddTransient<UserManager<User>, UserManager<User>>();
 builder.Services.AddTransient<SignInManager<User>, SignInManager<User>>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IProgressLogRepository, ProgressLogRepository>();
+builder.Services.AddTransient<IExerciseRepository, ExerciseRepository>();
+builder.Services.AddTransient<IMealPlanRepository, MealPlanRepository>();
+builder.Services.AddTransient<IWorkoutPlanRepository, WorkoutPlanRepository>();
 builder.Services.AddScoped<IGmailService, GmailService>();
 builder.Services.AddSingleton<CloudinaryService>();
 
