@@ -22,6 +22,27 @@ namespace BODYTRANINGAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("BODYTRANINGAPI.Models.DailyMealPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MealPlanId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealPlanId");
+
+                    b.ToTable("DailyMealPlans");
+                });
+
             modelBuilder.Entity("BODYTRANINGAPI.Models.Exercise", b =>
                 {
                     b.Property<int>("ExerciseId")
@@ -30,35 +51,29 @@ namespace BODYTRANINGAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExerciseId"));
 
-                    b.Property<bool?>("Access")
+                    b.Property<bool>("Access")
                         .HasColumnType("bit");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DifficultyLevel")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<TimeOnly?>("Duration")
-                        .HasColumnType("time");
-
-                    b.Property<int?>("MuscleId")
+                    b.Property<int>("ExercisePlanDetailId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ExerciseId");
 
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("MuscleId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Exercises");
                 });
@@ -72,53 +87,107 @@ namespace BODYTRANINGAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MediaId"));
 
                     b.Property<string>("Caption")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ExerciseId")
+                    b.Property<int>("ExerciselId")
                         .HasColumnType("int");
 
                     b.Property<string>("Uri")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MediaId");
 
-                    b.HasIndex("ExerciseId");
+                    b.HasIndex("ExerciselId");
 
                     b.ToTable("ExerciseMedia");
                 });
 
-            modelBuilder.Entity("BODYTRANINGAPI.Models.MealPlan", b =>
+            modelBuilder.Entity("BODYTRANINGAPI.Models.ExerciseMuscle", b =>
                 {
-                    b.Property<int>("MealPlanId")
+                    b.Property<int>("ExerciseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MuscleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExerciseId", "MuscleId");
+
+                    b.HasIndex("MuscleId");
+
+                    b.ToTable("ExerciseMuscles");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.MealItem", b =>
+                {
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MealPlanId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("Calories")
                         .HasColumnType("int");
 
+                    b.Property<int>("DailyMealPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MealName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DailyMealPlanId");
+
+                    b.ToTable("MealItems");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.MealItemImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MealItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealItemId");
+
+                    b.ToTable("MealItemImages");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.MealPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("MealType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PhotoUrl")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                    b.Property<string>("PlanName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("MealPlanId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
@@ -134,16 +203,13 @@ namespace BODYTRANINGAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MuscleId"));
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MuscleId");
 
@@ -159,8 +225,7 @@ namespace BODYTRANINGAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"));
 
                     b.Property<decimal?>("Bmi")
-                        .HasColumnType("decimal(5, 2)")
-                        .HasColumnName("BMI");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("CaloriesBurned")
                         .HasColumnType("int");
@@ -169,7 +234,7 @@ namespace BODYTRANINGAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Height")
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateOnly?>("LogDate")
                         .HasColumnType("date");
@@ -178,7 +243,7 @@ namespace BODYTRANINGAPI.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal?>("Weight")
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("LogId");
 
@@ -312,21 +377,28 @@ namespace BODYTRANINGAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlanId"));
 
+                    b.Property<bool>("Access")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ChooseStatus")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("DeleteStatus")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly?>("StartDate")
-                        .HasColumnType("date");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("PlanId");
@@ -334,6 +406,54 @@ namespace BODYTRANINGAPI.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("WorkoutPlans");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutPlanUser", b =>
+                {
+                    b.Property<int>("PlanId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("DateAssigned")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PlanId", "UserId");
+
+                    b.ToTable("WorkoutPlanUsers");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutProgress", b =>
+                {
+                    b.Property<int>("ProgressId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProgressId"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WorkoutScheduleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProgressId");
+
+                    b.HasIndex("WorkoutScheduleId")
+                        .IsUnique();
+
+                    b.ToTable("WorkoutProgresses");
                 });
 
             modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutSchedule", b =>
@@ -344,24 +464,48 @@ namespace BODYTRANINGAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScheduleId"));
 
-                    b.Property<int?>("PlanId")
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlanId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateOnly?>("WorkoutDate")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly?>("WorkoutTime")
-                        .HasColumnType("time");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ScheduleId");
 
                     b.HasIndex("PlanId");
 
                     b.ToTable("WorkoutSchedules");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutScheduleExercise", b =>
+                {
+                    b.Property<int>("WorkoutScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExerciseId")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("DistanceKm")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Reps")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Sets")
+                        .HasColumnType("int");
+
+                    b.HasKey("WorkoutScheduleId", "ExerciseId");
+
+                    b.HasIndex("ExerciseId");
+
+                    b.ToTable("WorkoutScheduleExercises");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -497,35 +641,87 @@ namespace BODYTRANINGAPI.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BODYTRANINGAPI.Models.DailyMealPlan", b =>
+                {
+                    b.HasOne("BODYTRANINGAPI.Models.MealPlan", "MealPlan")
+                        .WithMany("DailyMeals")
+                        .HasForeignKey("MealPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MealPlan");
+                });
+
             modelBuilder.Entity("BODYTRANINGAPI.Models.Exercise", b =>
                 {
-                    b.HasOne("BODYTRANINGAPI.Models.User", "CreatedByNavigation")
+                    b.HasOne("BODYTRANINGAPI.Models.User", "User")
                         .WithMany("Exercises")
-                        .HasForeignKey("CreatedBy");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("BODYTRANINGAPI.Models.Muscle", "Muscle")
-                        .WithMany("Exercises")
-                        .HasForeignKey("MuscleId");
-
-                    b.Navigation("CreatedByNavigation");
-
-                    b.Navigation("Muscle");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BODYTRANINGAPI.Models.ExerciseMedia", b =>
                 {
                     b.HasOne("BODYTRANINGAPI.Models.Exercise", "Exercise")
-                        .WithMany("ExerciseMedia")
-                        .HasForeignKey("ExerciseId");
+                        .WithMany("ExerciseMedias")
+                        .HasForeignKey("ExerciselId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Exercise");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.ExerciseMuscle", b =>
+                {
+                    b.HasOne("BODYTRANINGAPI.Models.Exercise", "Exercise")
+                        .WithMany("ExerciseMuscles")
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BODYTRANINGAPI.Models.Muscle", "Muscle")
+                        .WithMany("ExerciseMuscles")
+                        .HasForeignKey("MuscleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exercise");
+
+                    b.Navigation("Muscle");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.MealItem", b =>
+                {
+                    b.HasOne("BODYTRANINGAPI.Models.DailyMealPlan", "DailyMealPlan")
+                        .WithMany("Meals")
+                        .HasForeignKey("DailyMealPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DailyMealPlan");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.MealItemImage", b =>
+                {
+                    b.HasOne("BODYTRANINGAPI.Models.MealItem", "MealItem")
+                        .WithMany("MealItemImages")
+                        .HasForeignKey("MealItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MealItem");
                 });
 
             modelBuilder.Entity("BODYTRANINGAPI.Models.MealPlan", b =>
                 {
                     b.HasOne("BODYTRANINGAPI.Models.User", "User")
                         .WithMany("MealPlans")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -534,7 +730,8 @@ namespace BODYTRANINGAPI.Migrations
                 {
                     b.HasOne("BODYTRANINGAPI.Models.User", "User")
                         .WithMany("ProgressLogs")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
@@ -554,18 +751,63 @@ namespace BODYTRANINGAPI.Migrations
                 {
                     b.HasOne("BODYTRANINGAPI.Models.User", "User")
                         .WithMany("WorkoutPlans")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutPlanUser", b =>
+                {
+                    b.HasOne("BODYTRANINGAPI.Models.WorkoutPlan", "WorkoutPlan")
+                        .WithMany("WorkoutPlanUsers")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WorkoutPlan");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutProgress", b =>
+                {
+                    b.HasOne("BODYTRANINGAPI.Models.WorkoutSchedule", "WorkoutSchedule")
+                        .WithOne("WorkoutProgress")
+                        .HasForeignKey("BODYTRANINGAPI.Models.WorkoutProgress", "WorkoutScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WorkoutSchedule");
+                });
+
             modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutSchedule", b =>
                 {
-                    b.HasOne("BODYTRANINGAPI.Models.WorkoutPlan", "Plan")
+                    b.HasOne("BODYTRANINGAPI.Models.WorkoutPlan", "WorkoutPlan")
                         .WithMany("WorkoutSchedules")
-                        .HasForeignKey("PlanId");
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("Plan");
+                    b.Navigation("WorkoutPlan");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutScheduleExercise", b =>
+                {
+                    b.HasOne("BODYTRANINGAPI.Models.Exercise", "Exercise")
+                        .WithMany("WorkoutScheduleExercises")
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BODYTRANINGAPI.Models.WorkoutSchedule", "WorkoutSchedule")
+                        .WithMany("WorkoutScheduleExercises")
+                        .HasForeignKey("WorkoutScheduleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Exercise");
+
+                    b.Navigation("WorkoutSchedule");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -619,14 +861,33 @@ namespace BODYTRANINGAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BODYTRANINGAPI.Models.DailyMealPlan", b =>
+                {
+                    b.Navigation("Meals");
+                });
+
             modelBuilder.Entity("BODYTRANINGAPI.Models.Exercise", b =>
                 {
-                    b.Navigation("ExerciseMedia");
+                    b.Navigation("ExerciseMedias");
+
+                    b.Navigation("ExerciseMuscles");
+
+                    b.Navigation("WorkoutScheduleExercises");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.MealItem", b =>
+                {
+                    b.Navigation("MealItemImages");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.MealPlan", b =>
+                {
+                    b.Navigation("DailyMeals");
                 });
 
             modelBuilder.Entity("BODYTRANINGAPI.Models.Muscle", b =>
                 {
-                    b.Navigation("Exercises");
+                    b.Navigation("ExerciseMuscles");
                 });
 
             modelBuilder.Entity("BODYTRANINGAPI.Models.ProgressLog", b =>
@@ -647,7 +908,17 @@ namespace BODYTRANINGAPI.Migrations
 
             modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutPlan", b =>
                 {
+                    b.Navigation("WorkoutPlanUsers");
+
                     b.Navigation("WorkoutSchedules");
+                });
+
+            modelBuilder.Entity("BODYTRANINGAPI.Models.WorkoutSchedule", b =>
+                {
+                    b.Navigation("WorkoutProgress")
+                        .IsRequired();
+
+                    b.Navigation("WorkoutScheduleExercises");
                 });
 #pragma warning restore 612, 618
         }

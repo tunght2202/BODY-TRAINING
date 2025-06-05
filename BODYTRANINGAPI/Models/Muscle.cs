@@ -9,6 +9,6 @@ public partial class Muscle
     public string? Description { get; set; }
 
     public string? ImageUrl { get; set; }
+    public virtual ICollection<ExerciseMuscle> ExerciseMuscles { get; set; }
 
-    public virtual ICollection<Exercise> Exercises { get; set; }
 }
