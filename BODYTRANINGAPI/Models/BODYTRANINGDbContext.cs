@@ -1,30 +1,33 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BODYTRANINGAPI.Models;
 
-public class  BODYTRAININGDbContext: IdentityDbContext<User>
+public class BODYTRAININGDbContext : IdentityDbContext<User>
 {
     public BODYTRAININGDbContext(DbContextOptions<BODYTRAININGDbContext> options) : base(options) { }
+
     public virtual DbSet<Exercise> Exercises { get; set; }
-
     public virtual DbSet<ExerciseMedia> ExerciseMedia { get; set; }
-
+    public virtual DbSet<ExerciseMuscle> ExerciseMuscles { get; set; }
     public virtual DbSet<MealPlan> MealPlans { get; set; }
-
+    public virtual DbSet<DailyMealPlan> DailyMealPlans { get; set; }
     public virtual DbSet<Muscle> Muscles { get; set; }
-
     public virtual DbSet<ProgressLog> ProgressLogs { get; set; }
-
     public virtual DbSet<ProgressLogsMedias> ProgressLogsMedias { get; set; }
-
     public virtual DbSet<WorkoutPlan> WorkoutPlans { get; set; }
-
+    public virtual DbSet<WorkoutPlanUser> WorkoutPlanUsers { get; set; }
+    public virtual DbSet<WorkoutProgress> WorkoutProgresses { get; set; }
     public virtual DbSet<WorkoutSchedule> WorkoutSchedules { get; set; }
+    public virtual DbSet<WorkoutScheduleExercise> WorkoutScheduleExercises { get; set; }
+    public virtual DbSet<MealItem> MealItems { get; set; }
+    public virtual DbSet<MealItemImage> MealItemImages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Sửa lại bảng `AspNet` thành đúng tên bảng
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var tableName = entityType.GetTableName();
@@ -33,92 +36,114 @@ public class  BODYTRAININGDbContext: IdentityDbContext<User>
                 entityType.SetTableName(tableName.Substring(6));
             }
         }
-        modelBuilder.Entity<Exercise>(entity =>
+
+        // Cập nhật mối quan hệ giữa Exercise và ExerciseMuscles
+        modelBuilder.Entity<Exercise>()
+            .HasMany(e => e.ExerciseMuscles)
+            .WithOne(d => d.Exercise)
+            .HasForeignKey(d => d.ExerciseId);
+
+        // Mối quan hệ nhiều-nhiều giữa Exercise và Muscle
+        modelBuilder.Entity<ExerciseMuscle>()
+            .HasKey(e => new { e.ExerciseId, e.MuscleId });
+
+        modelBuilder.Entity<ExerciseMuscle>()
+            .HasOne(e => e.Exercise)
+            .WithMany(d => d.ExerciseMuscles)
+            .HasForeignKey(e => e.ExerciseId);
+
+        modelBuilder.Entity<ExerciseMuscle>()
+            .HasOne(e => e.Muscle)
+            .WithMany(m => m.ExerciseMuscles)
+            .HasForeignKey(e => e.MuscleId);
+
+        // Cập nhật ExerciseMedia để sửa lỗi "ExerciselId" -> thành "ExerciseId"
+        modelBuilder.Entity<Exercise>()
+            .HasMany(d => d.ExerciseMedias)
+            .WithOne(m => m.Exercise)
+            .HasForeignKey(m => m.ExerciselId); // Sửa ExerciselId thành ExerciseId
+      
+        modelBuilder.Entity<WorkoutPlan>()
+            .HasKey(pl => pl.PlanId); 
+
+        // Mối quan hệ giữa WorkoutPlan và WorkoutSchedule
+        modelBuilder.Entity<WorkoutPlan>()
+            .HasMany(wp => wp.WorkoutSchedules)
+            .WithOne(ws => ws.WorkoutPlan)
+            .HasForeignKey(ws => ws.PlanId)
+            .OnDelete(DeleteBehavior.NoAction); // Sử dụng NoAction để tránh Cascade
+
+        // Mối quan hệ giữa WorkoutSchedule và WorkoutScheduleExercise
+        modelBuilder.Entity<WorkoutScheduleExercise>()
+            .HasKey(wse => new { wse.WorkoutScheduleId, wse.ExerciseId });
+
+        modelBuilder.Entity<WorkoutScheduleExercise>()
+            .HasOne(wse => wse.WorkoutSchedule)
+            .WithMany(ws => ws.WorkoutScheduleExercises)
+            .HasForeignKey(wse => wse.WorkoutScheduleId)
+            .OnDelete(DeleteBehavior.NoAction); // Cài đặt NoAction
+
+        modelBuilder.Entity<WorkoutScheduleExercise>()
+            .HasOne(wse => wse.Exercise)
+            .WithMany(e => e.WorkoutScheduleExercises)
+            .HasForeignKey(wse => wse.ExerciseId)
+            .OnDelete(DeleteBehavior.NoAction); // Cài đặt NoAction
+
+
+        modelBuilder.Entity<WorkoutProgress>()
+            .HasKey(wp => wp.ProgressId); // Khóa chính cho WorkoutProgress
+
+        // Mối quan hệ giữa WorkoutSchedule và WorkoutProgress
+        modelBuilder.Entity<WorkoutProgress>()
+            .HasOne(wp => wp.WorkoutSchedule)
+            .WithOne(ws => ws.WorkoutProgress)
+            .HasForeignKey<WorkoutProgress>(wp => wp.WorkoutScheduleId)
+            .OnDelete(DeleteBehavior.Cascade); // Cascade khi xóa
+
+        // Mối quan hệ giữa WorkoutPlan và WorkoutPlanUser
+        modelBuilder.Entity<WorkoutPlanUser>()
+            .HasKey(wpu => new { wpu.PlanId, wpu.UserId });
+
+        modelBuilder.Entity<WorkoutPlanUser>()
+            .HasOne(wpu => wpu.WorkoutPlan)
+            .WithMany(wp => wp.WorkoutPlanUsers)
+            .HasForeignKey(wpu => wpu.PlanId);
+        // Khai báo khóa chính cho MealPlan
+        modelBuilder.Entity<MealPlan>()
+            .HasKey(pl => pl.Id);
+
+        // Mối quan hệ giữa MealPlan và DailyMealPlan
+        modelBuilder.Entity<MealPlan>()
+            .HasMany(p => p.DailyMeals)
+            .WithOne(d => d.MealPlan)
+            .HasForeignKey(d => d.MealPlanId);
+
+        // Mối quan hệ giữa DailyMealPlan và MealItem
+        modelBuilder.Entity<DailyMealPlan>()
+            .HasMany(d => d.Meals)
+            .WithOne(m => m.DailyMealPlan)
+            .HasForeignKey(m => m.DailyMealPlanId);
+
+        // Mối quan hệ giữa MealItem và MealItemImage
+        modelBuilder.Entity<MealItem>()
+            .HasMany(m => m.MealItemImages)
+            .WithOne(i => i.MealItem)
+            .HasForeignKey(i => i.MealItemId);
+        modelBuilder.Entity<ProgressLog>(ProgressLog => 
         {
-            entity.HasKey(e => e.ExerciseId);
-            entity.Property(e => e.ExerciseId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.DifficultyLevel).HasMaxLength(50);
-            entity.Property(e => e.Title).HasMaxLength(100);
-            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Exercises)
-                .HasForeignKey(d => d.CreatedBy);
-            entity.HasOne(d => d.Muscle).WithMany(p => p.Exercises)
-                .HasForeignKey(d => d.MuscleId);
+            ProgressLog.HasKey(pl => pl.LogId);
+            ProgressLog.HasOne(pl => pl.User)
+                .WithMany(u => u.ProgressLogs)
+                .HasForeignKey(pl => pl.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Xóa cascade khi người dùng bị xóa
         });
-
-        modelBuilder.Entity<ExerciseMedia>(entity =>
+        modelBuilder.Entity<ProgressLogsMedias>(plm => 
         {
-            entity.HasKey(e => e.MediaId);
-            entity.Property(e => e.MediaId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Caption).HasMaxLength(200);
-            entity.Property(e => e.Uri).HasMaxLength(255);
-            entity.HasOne(d => d.Exercise).WithMany(p => p.ExerciseMedia)
-                .HasForeignKey(d => d.ExerciseId);
+            plm.HasKey(plm => plm.PLMId);
+            plm.HasOne(plm => plm.ProgressLog)
+                .WithMany(pl => pl.ProgressLogsMedias)
+                .HasForeignKey(plm => plm.ProgressLogId)
+                .OnDelete(DeleteBehavior.Cascade); // Xóa cascade khi ProgressLog bị xóa
         });
-
-        modelBuilder.Entity<MealPlan>(entity =>
-        {
-            entity.HasKey(e => e.MealPlanId);
-            entity.Property(e => e.MealPlanId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.MealType).HasMaxLength(50);
-            entity.Property(e => e.PhotoUrl).HasMaxLength(255);
-            entity.HasOne(d => d.User).WithMany(p => p.MealPlans)
-                .HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<Muscle>(entity =>
-        {
-            entity.HasKey(e => e.MuscleId);
-            entity.Property(e => e.MuscleId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.ImageUrl).HasMaxLength(255);
-            entity.Property(e => e.Name).HasMaxLength(100);
-        });
-
-        modelBuilder.Entity<ProgressLog>(entity =>
-        {
-            entity.HasKey(e => e.LogId);
-            entity.Property(e => e.LogId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Bmi)
-                .HasColumnType("decimal(5, 2)")
-                .HasColumnName("BMI");
-            entity.Property(e => e.Height).HasColumnType("decimal(5, 2)");
-            entity.Property(e => e.Weight).HasColumnType("decimal(5, 2)");
-            entity.HasOne(d => d.User).WithMany(p => p.ProgressLogs)
-                .HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<ProgressLogsMedias>(entity =>
-        {
-            entity.HasKey(e => e.PLMId);
-            entity.Property(e => e.PLMId).ValueGeneratedOnAdd();
-            entity.HasOne(d => d.ProgressLog).WithMany(p => p.ProgressLogsMedias)
-                .HasForeignKey(d => d.ProgressLogId);
-        });
-
-
-        modelBuilder.Entity<WorkoutPlan>(entity =>
-        {
-            entity.HasKey(e => e.PlanId);
-            entity.Property(e => e.PlanId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.Title).HasMaxLength(100);
-
-            entity.HasOne(d => d.User).WithMany(p => p.WorkoutPlans)
-                .HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<WorkoutSchedule>(entity =>
-        {
-            entity.HasKey(e => e.ScheduleId);
-            entity.Property(e => e.ScheduleId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Status).HasMaxLength(50);
-
-            entity.HasOne(d => d.Plan).WithMany(p => p.WorkoutSchedules)
-                .HasForeignKey(d => d.PlanId);
-        });
-
     }
-
 }

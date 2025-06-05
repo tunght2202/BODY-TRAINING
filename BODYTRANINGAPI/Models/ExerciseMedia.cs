@@ -1,14 +1,17 @@
-﻿namespace BODYTRANINGAPI.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BODYTRANINGAPI.Models;
 
 public partial class ExerciseMedia
 {
+    [Key]
     public int MediaId { get; set; }
 
-    public int? ExerciseId { get; set; }
+    public int ExerciselId { get; set; }
 
     public string? Uri { get; set; }
 
     public string? Caption { get; set; }
+    public Exercise Exercise { get; set; }
 
-    public virtual Exercise? Exercise { get; set; }
 }

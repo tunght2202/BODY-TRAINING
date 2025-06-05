@@ -35,11 +35,11 @@ namespace BODYTRANINGAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateMealPlanModel model)
+        public async Task<IActionResult> Create([FromBody] MealPlanModel model, [FromForm] IFormFile image)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _repository.AddMealPlanAsync(userId, model);
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _repository.AddMealPlanAsync(model, userId, image);
             if (!result) return StatusCode(500, "Failed to create meal plan.");
             return Ok();
         }
