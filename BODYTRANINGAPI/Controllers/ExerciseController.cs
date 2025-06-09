@@ -1,4 +1,6 @@
-﻿using BODYTRANINGAPI.Repository.ExerciseRepo;
+﻿using AutoMapper;
+using BODYTRANINGAPI.Models;
+using BODYTRANINGAPI.Repository.ExerciseRepo;
 using BODYTRANINGAPI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,60 +13,61 @@ namespace BODYTRANINGAPI.Controllers
     [Authorize]
     public class ExerciseController : ControllerBase
     {
-        private readonly IExerciseRepository _repository;
+        private readonly IExerciseRepository _exerciseRepository;
+        private readonly IMapper _mapper;
 
-        public ExerciseController(IExerciseRepository repository)
+        public ExerciseController(IExerciseRepository exerciseRepository
+            , IMapper mapper)
         {
-            _repository = repository;
+            _exerciseRepository = exerciseRepository;
+            _mapper = mapper;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpPost("add")]
+        public async Task<ActionResult> AddExerciseAsync([FromForm] AddExerciseViewModel addExerciseViewModel)
         {
-            var exercises = await _repository.GetAllAsync();
-            return Ok(exercises);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Ánh xạ từ AddExerciseViewModel sang đối tượng Exercise
+            var exercise = _mapper.Map<Exercise>(addExerciseViewModel);
+
+            // Lấy UserId từ Claims để gán cho Exercise
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User not found.");
+            }
+            exercise.UserId = userId;
+
+            // Ánh xạ các ExerciseMuscle và ExerciseMedia từ ViewModel sang đối tượng
+            var exerciseMuscles = addExerciseViewModel.ListMuscles;
+
+            // Convert single IFormFile to a List<IFormFile> as required by PushListImage
+            var image = addExerciseViewModel.Images;
+            var exerciseMedias = await _exerciseRepository.PushListImage(image);
+
+            // Thực hiện thêm Exercise, ExerciseMuscle và ExerciseMedia vào cơ sở dữ liệu
+            await _exerciseRepository.AddExerciseAsync(exercise, exerciseMuscles, exerciseMedias);
+
+            return Ok();
         }
+
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<GetExerciseViewModel>> GetExercise(int id)
         {
-            var exercise = await _repository.GetByIdAsync(id);
-            if (exercise == null) return NotFound();
-            return Ok(exercise);
-        }
+            var exercise = await _exerciseRepository.GetByIdAsync(id);
+            if (exercise == null)
+            {
+                return NotFound();
+            }
 
-        [HttpGet("muscle/{muscleId}")]
-        public async Task<IActionResult> GetByMuscleId(int muscleId)
-        {
-            var exercises = await _repository.GetByMuscleIdAsync(muscleId);
-            return Ok(exercises);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateExerciseModel model)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var createdBy = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _repository.AddAsync(model, createdBy);
-            if (!result) return StatusCode(500, "Failed to create exercise.");
-            return Ok();
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] CreateExerciseModel model)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await _repository.UpdateAsync(id, model);
-            if (!result) return NotFound();
-            return Ok();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _repository.DeleteAsync(id);
-            if (!result) return NotFound();
-            return Ok();
+            // Ánh xạ từ mô hình Exercise sang ViewModel GetExerciseViewModel
+            var exerciseViewModel = _mapper.Map<GetExerciseViewModel>(exercise);
+            return Ok(exerciseViewModel);
         }
     }
 }

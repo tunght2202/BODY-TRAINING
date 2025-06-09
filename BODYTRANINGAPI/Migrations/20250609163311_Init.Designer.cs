@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BODYTRANINGAPI.Migrations
 {
     [DbContext(typeof(BODYTRAININGDbContext))]
-    [Migration("20250605184615_Updatedatabasev1")]
-    partial class Updatedatabasev1
+    [Migration("20250609163311_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,8 +63,12 @@ namespace BODYTRANINGAPI.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ExercisePlanDetailId")
-                        .HasColumnType("int");
+                    b.Property<string>("DifficultyLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()

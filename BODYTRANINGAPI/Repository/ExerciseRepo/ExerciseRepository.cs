@@ -1,101 +1,183 @@
-﻿//using BODYTRANINGAPI.Models;
-//using BODYTRANINGAPI.ViewModels;
-//using Microsoft.EntityFrameworkCore;
+﻿using BODYTRANINGAPI.Models;
+using BODYTRANINGAPI.Services.Cloudinaries;
+using BODYTRANINGAPI.ViewModels;
+using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
-//namespace BODYTRANINGAPI.Repository.ExerciseRepo
-//{
-//    public class ExerciseRepository : IExerciseRepository
-//    {
-//        private readonly BODYTRAININGDbContext _context;
-//        public ExerciseRepository(BODYTRAININGDbContext context)
-//        {
-//            _context = context;
-//        }
+namespace BODYTRANINGAPI.Repository.ExerciseRepo
+{
+    public class ExerciseRepository : IExerciseRepository
+    {
+        private readonly BODYTRAININGDbContext _context;
+        private readonly CloudinaryService _cloudinaryService;
 
-//        public async Task<IEnumerable<ExerciseModel>> GetAllAsync()
-//        {
-//            return await _context.Exercises
-//                .Include(e => e.Muscle)
-//                .Select(e => new ExerciseModel
-//                {
-//                    ExerciseId = e.ExerciseId,
-//                    Title = e.Title,
-//                    Description = e.Description,
-//                    DifficultyLevel = e.DifficultyLevel,
-//                    Duration = e.Duration,
-//                    MuscleName = e.Muscle!.Name
-//                }).ToListAsync();
-//        }
+        public ExerciseRepository(BODYTRAININGDbContext context
+            , CloudinaryService cloudinaryService)
+        {
+            _context = context;
+            _cloudinaryService = cloudinaryService;
+        }
 
-//        public async Task<ExerciseModel?> GetByIdAsync(int id)
-//        {
-//            var e = await _context.Exercises.Include(x => x.Muscle).FirstOrDefaultAsync(x => x.ExerciseId == id);
-//            if (e == null) return null;
+        // Triển khai các phương thức cơ bản từ IRepository<Exercise>
+        public async Task<IEnumerable<Exercise>> GetAllAsync()
+        {
+            return await _context.Exercises
+                .Where(e => (e.IsDeleted == false) && (e.Access == true))
+                .ToListAsync();
+        }
 
-//            return new ExerciseModel
-//            {
-//                ExerciseId = e.ExerciseId,
-//                Title = e.Title,
-//                Description = e.Description,
-//                DifficultyLevel = e.DifficultyLevel,
-//                Duration = e.Duration,
-//                MuscleName = e.Muscle?.Name
-//            };
-//        }
+        // Triển khai các phương thức chuyên biệt từ IExerciseRepository
+        public async Task<IEnumerable<Exercise>> GetExercisesByTitleByUserAsync(string exerciseTitle)
+        {
+            return await _context.Exercises
+                .Where(e => e.Title.Equals(exerciseTitle, StringComparison.OrdinalIgnoreCase))
+                .ToListAsync();
+        }
 
-//        public async Task<bool> AddAsync(CreateExerciseModel model, string createdBy)
-//        {
-//            var entity = new Exercise
-//            {
-//                Title = model.Title,
-//                Description = model.Description,
-//                DifficultyLevel = model.DifficultyLevel,
-//                Duration = model.Duration,
-//                MuscleId = model.MuscleId,
-//                CreatedBy = createdBy,
-//                Access = true
-//            };
-//            await _context.Exercises.AddAsync(entity);
-//            return await _context.SaveChangesAsync() > 0;
-//        }
+        public async Task<IEnumerable<Exercise>> GetExercisesByMuscleByUserAsync(int muscleId)
+        {
+            return await _context.Exercises
+                .Include(x => x.ExerciseMuscles)
+                .ThenInclude(em => em.Muscle)
+                .Where(e => e.ExerciseMuscles.Any(em => em.MuscleId == muscleId))
+                .ToListAsync();
+        }
 
-//        public async Task<bool> UpdateAsync(int id, CreateExerciseModel model)
-//        {
-//            var entity = await _context.Exercises.FindAsync(id);
-//            if (entity == null) return false;
+        public async Task<IEnumerable<Exercise>> GetExercisesByDifficultLevelByUserAsync(string difficultLevel)
+        {
+            return await _context.Exercises
+                .Where(e => e.DifficultyLevel.Equals(difficultLevel))
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Exercise>> GetAllByUserAsync(string userId)
+        {
+            return await _context.Exercises
+                .Where(e => (e.UserId == userId) && (e.IsDeleted == false))
+                .ToListAsync();
+        }
 
-//            entity.Title = model.Title;
-//            entity.Description = model.Description;
-//            entity.DifficultyLevel = model.DifficultyLevel;
-//            entity.Duration = model.Duration;
-//            entity.MuscleId = model.MuscleId;
+        public async Task<Exercise> GetByIdAsync(int id)
+        {
+            return await _context.Exercises.FindAsync(id);
+        }
 
-//            _context.Exercises.Update(entity);
-//            return await _context.SaveChangesAsync() > 0;
-//        }
+        public async Task AddAsync(Exercise entity)
+        {
+            await _context.Exercises.AddAsync(entity);
+            await SaveAsync();
+        }
 
-//        public async Task<bool> DeleteAsync(int id)
-//        {
-//            var entity = await _context.Exercises.FindAsync(id);
-//            if (entity == null) return false;
+        public async Task AddExerciseAsync(Exercise exercise, List<int> muscles, List<String> media)
+        {
+            // Thêm Exercise vào cơ sở dữ liệu
+            await _context.Exercises.AddAsync(exercise);
+            await _context.SaveChangesAsync();
 
-//            _context.Exercises.Remove(entity);
-//            return await _context.SaveChangesAsync() > 0;
-//        }
+            // Thêm ExerciseMuscle liên quan đến Exercise
+            foreach (var muscle in muscles)
+            {
+                var exerciseMuscle = new ExerciseMuscle
+                {
+                    ExerciseId = exercise.ExerciseId,
+                    MuscleId = muscle
+                };
+                _context.ExerciseMuscles.Add(exerciseMuscle);
+            }
 
-//        public async Task<IEnumerable<ExerciseModel>> GetByMuscleIdAsync(int muscleId)
-//        {
-//            return await _context.Exercises
-//                .Where(x => x.MuscleId == muscleId)
-//                .Select(e => new ExerciseModel
-//                {
-//                    ExerciseId = e.ExerciseId,
-//                    Title = e.Title,
-//                    Description = e.Description,
-//                    DifficultyLevel = e.DifficultyLevel,
-//                    Duration = e.Duration,
-//                    MuscleName = e.Muscle!.Name
-//                }).ToListAsync();
-//        }
-//    }
-//}
+            // Thêm ExerciseMedia liên quan đến Exercise
+            foreach (var m in media)
+            {
+                var exerciseMedia = new ExerciseMedia
+                {
+                    Uri = m,
+                    ExerciselId = exercise.ExerciseId
+                };
+                _context.ExerciseMedia.Add(exerciseMedia);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Exercise entity)
+        {
+            _context.Exercises.Update(entity);
+            await SaveAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var entity = await _context.Exercises.FindAsync(id);
+            if (entity != null)
+            {
+                _context.Exercises.Remove(entity);
+                await SaveAsync();
+            }
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> PushImage(IFormFile image)
+        {
+            try
+            {
+                string imageUrl = null;
+                if (image != null)
+                {
+                    imageUrl = await _cloudinaryService.UploadImageAsync(image);
+                }
+                if(imageUrl == null)
+                {
+                    throw new Exception("Can't push image");
+                }
+                return imageUrl;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Can't push image");
+            }
+        }
+
+        public async Task<List<string>> PushListImage(List<IFormFile> listImage)
+        {
+            try
+            {
+                if (!(listImage.Count > 0))
+                {
+                    throw new Exception("Please add image");
+                }
+                List<string> imageUrls = new List<string>();
+                foreach (var image in listImage)
+                {
+                    if (image == null)
+                    {
+                        throw new Exception("Please add image");
+                    }
+
+                    string imageUrl = null;
+                    if (image != null)
+                    {
+                        imageUrl = await _cloudinaryService.UploadImageAsync(image);
+                    }
+                    if (imageUrl == null)
+                    {
+                        throw new Exception("Can't push image");
+                    }
+                     imageUrls.Add(imageUrl);
+                }
+                if (imageUrls.Count == 0)
+                {
+                    throw new Exception("Can't push image");
+                }
+                return imageUrls;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Can't push image");
+            }
+        }
+    }
+}
