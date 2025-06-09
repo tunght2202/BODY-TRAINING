@@ -101,12 +101,13 @@ namespace BODYTRANINGAPI.Migrations
                 {
                     ExerciseId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ExercisePlanDetailId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Access = table.Column<bool>(type: "bit", nullable: false)
+                    Access = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DifficultyLevel = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -261,7 +262,8 @@ namespace BODYTRANINGAPI.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ChooseStatus = table.Column<bool>(type: "bit", nullable: false),
-                    DeleteStatus = table.Column<bool>(type: "bit", nullable: false)
+                    DeleteStatus = table.Column<bool>(type: "bit", nullable: false),
+                    Access = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
